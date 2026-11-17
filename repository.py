@@ -76,7 +76,8 @@ def find_items(db_path, category=None, location=None):
         rows = conn.execute(sql, params).fetchall()
     finally:
         conn.close()
-    return [{"id": r[0], "category": r[1], "location": r[2]} for r in rows]
+    return [{"類別": r[0], "總件數": r[1], "待認領": r[2], "已認領": r[3]} for r
+in rows]
 
 
 def mark_claimed(db_path, item_id, claimer):
@@ -110,8 +111,9 @@ def category_stats(db_path):
         rows = conn.execute("""
             SELECT c.name,
                    COUNT(i.id),
-                   COUNT(CASE WHEN i.status = '待認領' THEN 1 END)
-            FROM categories c
+                   COUNT(CASE WHEN i.status = '待認領' THEN 1 END),
+                    COUNT(CASE WHEN i.status = '已認領' THEN 1 END)
+                FROM categories c
             LEFT JOIN items i ON i.category = c.name
             GROUP BY c.name
             ORDER BY c.rowid""").fetchall()
