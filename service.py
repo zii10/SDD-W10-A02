@@ -21,6 +21,8 @@ def report_found(db_path, category, location, description=""):
         return _result(False, "請說明是什麼物品（例如：雨傘、水壺、學生證）。")
     if location not in LOCATIONS:
         return _result(False, "請說明在哪裡撿到的（例如：圖書館、餐廳）。")
+    if len(description) > 50:
+        return _result(False, "描述太⻑了，請在 50 字以內。")
     new_id = repo.add_item(db_path, category, location, description)
     return _result(True, f"已登記：{location}撿到的{category}，編號 {new_id}。請送到系辦。",
                    {"id": new_id})
