@@ -18,6 +18,38 @@ def test_get_item_not_found_returns_none(db):
 
 
 # ---------------- 第一輪：請從這裡開始加 ----------------
+def test_get_item_returns_expected_fields(sample_db):
+    item = repository.get_item(sample_db, 2)
+    assert item is not None
+    assert item["category"] == "水壺"
+    assert item["location"] == "餐廳"
+    assert item["status"] == "待認領"
+    assert item["claimer"] is None
+
+
+def test_find_items_by_category(sample_db):
+    items = repository.find_items(sample_db, category="雨傘")
+    assert [it["id"] for it in items] == [1, 3]
+
+
+def test_mark_claimed_updates_status(sample_db):
+    assert repository.mark_claimed(sample_db, 1, "王小明") is True
+    item = repository.get_item(sample_db, 1)
+    assert item["status"] == "已認領"
+    assert item["claimer"] == "王小明"
 
 
 # ---------------- 第二輪：邊界與錯誤情況 ----------------
+def test_find_items_no_match_returns_empty_list(sample_db):
+    items = repository.find_items(sample_db, category="手機")
+    assert items == []
+
+
+def test_mark_claimed_nonexistent_item_returns_false(sample_db):
+    assert repository.mark_claimed(sample_db, 99, "王小明") is False
+
+
+def test_mark_claimed_already_claimed_item_returns_false(sample_db):
+    assert repository.mark_claimed(sample_db, 1, "王小明") is True
+    # 同一件物品已被認領，再次認領應失敗
+    assert repository.mark_claimed(sample_db, 1, "李小華") is False
